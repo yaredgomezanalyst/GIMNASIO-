@@ -5,6 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
 <meta name="theme-color" content="#0b0d10">
 <meta name="color-scheme" content="dark">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="Entreno">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <title>Entreno 8 semanas</title>
 <style>
 :root{
@@ -1415,7 +1422,7 @@ function renderSettings(){
   </section>`;
 
   h += `<section class="card night"><h2>Dónde se guardan tus datos</h2>
-    <p class="small muted" style="margin:8px 0 0">Los datos se guardan <b style="color:var(--text)">solo en este navegador y en esta dirección</b> (almacenamiento local). No se sincronizan entre dispositivos ni se envían a ningún servidor, y pueden perderse si borras los datos del navegador, usas modo privado o abres el archivo desde otra ubicación.</p>
+    <p class="small muted" style="margin:8px 0 0">Los datos se guardan <b style="color:var(--text)">solo en este navegador y en esta dirección</b> (almacenamiento local). ${cloudOn() ? 'Además, como tienes la nube activada, se envía una copia a <b style="color:var(--text)">tu proyecto de Supabase</b> y se sincroniza con tus otros dispositivos.' : 'No se sincronizan entre dispositivos ni se envían a ningún servidor (salvo que actives la nube, más abajo), y pueden perderse si borras los datos del navegador, usas modo privado o abres el archivo desde otra ubicación.'}</p>
     <p class="small muted">Descarga una copia JSON con regularidad (por ejemplo, al terminar cada semana) y guárdala en tu nube o correo.</p>
     <div class="small" style="margin-top:8px">Estado: ${storageOK?'<span class="pill">Guardado local activo</span>':'<span class="pill warn">Almacenamiento bloqueado</span>'}</div>
     <div class="small muted" style="margin-top:6px">${nS} sesiones con datos · ${nB} registros corporales · Última copia: ${lb?new Date(lb).toLocaleString('es-ES'):'nunca'}</div>
@@ -1761,7 +1768,7 @@ document.addEventListener('click', async ev => {
   const t = ev.target.closest('[data-action^="cloud-"]'); if(!t) return;
   const a = t.dataset.action;
   if(a === 'cloud-config'){
-    const url = $('#cl_url').value.trim().replace(/\/+$/,''), key = $('#cl_key').value.trim();
+    const url = $('#cl_url').value.trim().replace(/\/(rest|auth)\/v1.*$/i,'').replace(/\/+$/,''), key = $('#cl_key').value.trim();
     if(!/^https:\/\/[^\s/]+$/.test(url)) { $('#cl_url').classList.add('bad'); return toast('La URL debe ser del tipo https://xxxx.supabase.co'); }
     if(key.length < 20) { $('#cl_key').classList.add('bad'); return toast('Pega la clave pública completa'); }
     if(/^sb_secret_/.test(key) || /service_role/.test((()=>{ try{ return atob(key.split('.')[1]||''); }catch(e){ return ''; } })())) return modalAlert('Clave secreta', 'Esa es la clave <b>secreta</b>. Usa la clave <b>publishable</b> (o «anon»), que es la que puede ir en una página web.');
